@@ -17,6 +17,15 @@ class Client(db.Model):
         db.session.add(self)
         db.session.commit()
 
+    def as_dict(self):
+        return {
+            'id': self.id,
+            'first_name': self.first_name,
+            'last_name': self.last_name,
+            'phone_number': self.phone_number,
+            'address': self.address
+        }
+
     def __repr__(self):
         return f'<Client {self.first_name} {self.last_name}>'
 
@@ -25,7 +34,7 @@ class Appointment(db.Model):
     __tablename__ = 'appointments'
 
     id = db.Column(db.Integer, primary_key=True)
-    time = db.Column(db.Time)
+    date = db.Column(db.DateTime, nullable=True)
     duration = db.Column(db.Integer)
     client_id = db.Column(db.Integer, db.ForeignKey('clients.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -38,12 +47,24 @@ class Appointment(db.Model):
         db.session.add(self)
         db.session.commit()
 
-    def __repr__(self):
-        return f'<Appointment {self.id}>'
+    def set_date(self, date: str):
+        self.date = datetime.datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
 
     def save(self):
         db.session.add(self)
         db.session.commit()
+
+    def as_dict(self):
+        return {
+            'id': self.id,
+            'date': self.date.strftime('%Y-%m-%d %H:%M:%S'),
+            'duration': self.duration,
+            'client': self.client.as_dict(),
+            'user': self.user.as_dict(),
+        }
+
+    def __repr__(self):
+        return f'<Appointment {self.id}>'
 
 
 class User(db.Model):
@@ -65,6 +86,14 @@ class User(db.Model):
         db.session.add(self)
         db.session.commit()
 
+    def as_dict(self):
+        return {
+            'id': self.id,
+            'username': self.username,
+            'is_admin': self.is_admin,
+            'checked_in': self.checked_in,
+        }
+
     def __repr__(self):
         return f'<User {self.username}>'
 
@@ -83,6 +112,14 @@ class Panic(db.Model):
     def save(self):
         db.session.add(self)
         db.session.commit()
+
+    def as_dict(self):
+        return {
+            'id': self.id,
+            'timestamp': self.timestamp.strftime('%Y-%m-%d %H:%M:%S'),
+            'appointment': self.appointment.as_dict(),
+            'user': self.user.as_dict(),
+        }
 
     def __repr__(self) -> str:
         return f'<Panic {self.id} {self.user} {self.appointment}>'

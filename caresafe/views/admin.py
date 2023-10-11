@@ -30,11 +30,12 @@ def call_admin():
 @require_admin
 def create_appointment(user_id):
     data = request.get_json()
-    time = data.get('time')
+    date = data.get('date')
     duration = data.get('duration')
     client_id = data.get('client_id')
     target_user_id = data.get('user_id')
-    appointment = Appointment(time=time, duration=duration, client_id=client_id, user_id=target_user_id)
+    appointment = Appointment(duration=duration, client_id=client_id, user_id=target_user_id)
+    appointment.set_date(date)
     appointment.save()
     return jsonify({'message': 'Appointment created', 'id': appointment.id}), 201
 
@@ -49,10 +50,10 @@ def get_appointments(user_id):
             'appointments': [
                 {
                     'id': appointment.id,
-                    'time': appointment.time.strftime('%H:%M'),
+                    'date': appointment.date.strftime('%Y-%m-%d %H:%M:%S'),
                     'duration': appointment.duration,
-                    'client_id': appointment.client_id,
-                    'user_id': appointment.user_id,
+                    'client': appointment.client.as_dict(),
+                    'user': appointment.user.as_dict(),
                 }
                 for appointment in appointments
             ]
