@@ -1,26 +1,23 @@
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from dotenv import load_dotenv
+from flask_sqlalchemy import SQLAlchemy
 
 load_dotenv()
 
-db = SQLAlchemy()
 bcrypt = Bcrypt()
 
 def create_app():
     app = Flask(__name__)
 
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///caresafe.db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://spaghetti:@penne23@spaggettihoopos.postgres.database.azure.com/spaggettihoopos'
 
-    db.init_app(app)
     bcrypt.init_app(app)
 
     @app.cli.command("init-db")
     def init_db():
-        db.create_all()
+        db = SQLAlchemy(app)
         print("Database has been created!")
-    
     from caresafe.views import auth, admin, user
 
     app.register_blueprint(auth.bp)
