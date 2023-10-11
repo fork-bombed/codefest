@@ -34,7 +34,7 @@ def extend_session(user_id):
         if appointment is None:
             return jsonify({'message': 'Appointment not found'}), 404
 
-        if user.id != appointment.client_id:
+        if user.id != appointment.user.id:
             return jsonify({'message': 'Permission denied'}), 403
 
         appointment.duration += int(extension)
