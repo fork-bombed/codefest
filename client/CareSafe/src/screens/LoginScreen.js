@@ -11,7 +11,7 @@ import {
   TouchableOpacity
 } from 'react-native';
 
-const LoginScreen = () => {
+export default function LoginScreen({ navigation }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
@@ -95,5 +95,3 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
 });
-
-export default LoginScreen;
