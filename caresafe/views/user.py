@@ -1,7 +1,9 @@
 from flask import Blueprint, jsonify, request
 
+from caresafe import db
 from caresafe.services.auth_service import require_auth
-from caresafe.models.models import User, Panic
+from caresafe.models.models import User, Panic, Appointment
+from sqlalchemy.exc import IntegrityError
 
 bp = Blueprint('user', __name__, url_prefix='/user')
 
@@ -17,7 +19,6 @@ def user_home(user_id):
     )
 
 
-<<<<<<< HEAD
 
 @bp.route('/panic', methods=['POST'])
 @require_auth
@@ -60,7 +61,8 @@ def extend_session(user_id):
     except Exception as e:
         db.session.rollback()  # Roll back changes on error
         return jsonify({'message': f'Failed to update: {str(e)}'}), 400
-=======
+    
+
 @bp.route('/appointments', methods=['GET'])
 @require_auth
 def get_user_appointments(user_id):
@@ -80,4 +82,3 @@ def get_user_appointments(user_id):
             ]
         }
     )
->>>>>>> 09c4a4b (Add appointments and clients)

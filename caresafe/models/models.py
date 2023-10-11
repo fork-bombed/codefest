@@ -17,6 +17,9 @@ class Client(db.Model):
         db.session.add(self)
         db.session.commit()
 
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
     def __repr__(self):
         return f'<Client {self.first_name} {self.last_name}>'
 
@@ -25,7 +28,7 @@ class Appointment(db.Model):
     __tablename__ = 'appointments'
 
     id = db.Column(db.Integer, primary_key=True)
-    time = db.Column(db.Time)
+    date = db.Column(db.DateTime, nullable=True)
     duration = db.Column(db.Integer)
     client_id = db.Column(db.Integer, db.ForeignKey('clients.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
@@ -38,12 +41,18 @@ class Appointment(db.Model):
         db.session.add(self)
         db.session.commit()
 
-    def __repr__(self):
-        return f'<Appointment {self.id}>'
+    def set_date(self, date: str):
+        self.date = datetime.datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
 
     def save(self):
         db.session.add(self)
         db.session.commit()
+
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
+    def __repr__(self):
+        return f'<Appointment {self.id}>'
 
 
 class User(db.Model):
@@ -65,6 +74,9 @@ class User(db.Model):
         db.session.add(self)
         db.session.commit()
 
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
     def __repr__(self):
         return f'<User {self.username}>'
 
@@ -83,6 +95,9 @@ class Panic(db.Model):
     def save(self):
         db.session.add(self)
         db.session.commit()
+
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
 
     def __repr__(self) -> str:
         return f'<Panic {self.id} {self.user} {self.appointment}>'
