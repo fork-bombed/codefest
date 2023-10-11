@@ -1,7 +1,10 @@
+from sqlite3 import IntegrityError
+
 from flask import Blueprint, jsonify, request
 
+from caresafe import db
 from caresafe.services.auth_service import require_auth
-from caresafe.models.models import User, Panic
+from caresafe.models.models import User, Panic, Appointment
 
 bp = Blueprint('user', __name__, url_prefix='/user')
 
@@ -16,6 +19,7 @@ def user_home(user_id):
         }
     )
 
+
 @bp.route('/panic', methods=['POST'])
 @require_auth
 def user_panic(user_id):
@@ -27,7 +31,6 @@ def user_panic(user_id):
 @bp.route('/extend', methods=['POST'])
 @require_auth
 def extend_session(user_id):
-
     try:
         data = request.get_json()
         extension = data.get('extension_time')
@@ -57,7 +60,8 @@ def extend_session(user_id):
     except Exception as e:
         db.session.rollback()  # Roll back changes on error
         return jsonify({'message': f'Failed to update: {str(e)}'}), 400
-=======
+
+
 @bp.route('/appointments', methods=['GET'])
 @require_auth
 def get_user_appointments(user_id):
@@ -77,4 +81,21 @@ def get_user_appointments(user_id):
             ]
         }
     )
->>>>>>> 09c4a4b (Add appointments and clients)
+
+
+@bp.route('/checkin', methods=['POST'])
+@require_auth
+def check_in(user_id):
+    user = User.query.get(user_id)
+    user.checked_in = True
+    user.save()
+    return jsonify({'check in status': user.checked_in})
+
+
+@bp.route('/checkout', methods=['POST'])
+@require_auth
+def check_out(user_id):
+    user = User.query.get(user_id)
+    user.checked_in = False
+    user.save()
+    return jsonify({'check in status': user.checked_in})
