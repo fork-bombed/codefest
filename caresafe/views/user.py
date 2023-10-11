@@ -62,7 +62,7 @@ def extend_session(user_id):
         db.session.rollback()  # Roll back changes on error
         return jsonify({'message': f'Failed to update: {str(e)}'}), 400
 
-      
+
 @bp.route('/appointments', methods=['GET'])
 @require_auth
 def get_user_appointments(user_id):
