@@ -19,6 +19,13 @@ def get_panic():
     return jsonify({'panics': panics})
 
 
+
+@bp.route('/call_admin', methods=['GET'])
+def call_admin():
+    phone = "07733891033"
+    return jsonify({'phone': phone})
+
+
 @bp.route('/appointments', methods=['POST'])
 @require_auth
 @require_admin
