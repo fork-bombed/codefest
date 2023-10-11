@@ -53,8 +53,8 @@ def get_appointments(user_id):
                     'id': appointment.id,
                     'date': appointment.date.strftime('%Y-%m-%d %H:%M:%S'),
                     'duration': appointment.duration,
-                    'client_id': appointment.client_id,
-                    'user_id': appointment.user_id,
+                    'client': appointment.client.as_dict(),
+                    'user': appointment.user.as_dict(),
                 }
                 for appointment in appointments
             ]
