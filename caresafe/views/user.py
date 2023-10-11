@@ -19,8 +19,7 @@ def user_home(user_id):
 @bp.route('/extend', methods=['POST'])
 @require_auth
 def extend_session(user_id):
-
- def extend_appointment():
+    
     try:
         data = request.get_json()
         user_id = data.get('user_id')
