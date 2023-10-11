@@ -20,15 +20,19 @@ def user_home(user_id):
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
 >>>>>>> 526ed0b (Refucked and unfucked the stuff)
+=======
+>>>>>>> 40bed54 (Fix smol issue)
 @bp.route('/panic', methods=['POST'])
 @require_auth
 def user_panic(user_id):
     appointment_id = request.json.get('appointment_id')
     panic = Panic(appointment_id=appointment_id, user_id=user_id)
     panic.save()
+<<<<<<< HEAD
     
 
 <<<<<<< HEAD
@@ -67,6 +71,8 @@ def extend_session(user_id):
     except Exception as e:
         db.session.rollback()  # Roll back changes on error
         return jsonify({'message': f'Failed to update: {str(e)}'}), 400
+=======
+>>>>>>> 40bed54 (Fix smol issue)
     
 
 >>>>>>> 526ed0b (Refucked and unfucked the stuff)
