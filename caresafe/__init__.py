@@ -6,17 +6,18 @@ from flask_sqlalchemy import SQLAlchemy
 load_dotenv()
 
 bcrypt = Bcrypt()
+db = SQLAlchemy()
 
 def create_app():
     app = Flask(__name__)
 
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://spaghetti:@penne23@spaggettihoopos.postgres.database.azure.com/spaggettihoopos'
-
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://spaghetti:#penne23@spaggettihoopos.postgres.database.azure.com:5432/postgres'
+    db.init_app(app)
     bcrypt.init_app(app)
 
     @app.cli.command("init-db")
     def init_db():
-        db = SQLAlchemy(app)
+        db.create_all()
         print("Database has been created!")
 
     @app.cli.command("force-init-db")
