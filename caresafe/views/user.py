@@ -91,9 +91,6 @@ def check_out(user_id):
     user.checked_in = False
     user.save()
     return jsonify({'check in status': user.checked_in})
-<<<<<<< HEAD
-  
-=======
 
 
 @bp.route('/<int:user_id>/appointments', methods=['GET'])
@@ -104,14 +101,12 @@ def get_user_appointments_by_id(user_id):
     appointment_list = [{'id': appt.id, 'date': appt.date} for appt in appointments]
     return jsonify(appointment_list)
 
->>>>>>> 2942179 (don't panic)
 
 @bp.route('/<int:user_id>/appointments/<int:appt_id>', methods=['GET'])
 def get_user_appointment_by_appt_id(user_id, appt_id):
     appt = Appointment.query.get_or_404(appt_id)
 
     return jsonify({'selected appointment': appt.as_dict()})
-
 
 
 @bp.route('/appointments/<int:appointment_id>/decline', methods=['POST'])
