@@ -1,5 +1,3 @@
-// LoginScreen.js
-
 import React, { useState } from 'react';
 import {
   View,
@@ -8,8 +6,10 @@ import {
   TextInput,
   Image,
   Button,
-  TouchableOpacity
+  TouchableOpacity,
+  Alert
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen({ navigation }) {
   const [username, setUsername] = useState('');
@@ -30,13 +30,14 @@ export default function LoginScreen({ navigation }) {
       }
 
       const { token } = await response.json();
-      // Save the token to local storage
-      localStorage.setItem('token', token);
+      // Save the token to AsyncStorage
+      await AsyncStorage.setItem('token', token);
       console.log('Login successful. Token:', token);
       // Navigate to the main app screen
-      navigation.navigate('Main');
+      navigation.navigate('Appointments');
     } catch (error) {
       console.error(error);
+      Alert.alert("Error", "Login failed. Please check your credentials.");
     }
   };
 
