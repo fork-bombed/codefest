@@ -26,6 +26,7 @@ def user_panic(user_id):
     panic = Panic(appointment_id=appointment_id, user_id=user_id)
     panic.save()
 
+ 
 @bp.route('/extend', methods=['POST'])
 @require_auth
 def extend_session(user_id):
@@ -59,7 +60,7 @@ def extend_session(user_id):
         db.session.rollback()  # Roll back changes on error
         return jsonify({'message': f'Failed to update: {str(e)}'}), 400
 
-
+      
 @bp.route('/appointments', methods=['GET'])
 @require_auth
 def get_user_appointments(user_id):
@@ -88,24 +89,13 @@ def check_out(user_id):
     user.checked_in = False
     user.save()
     return jsonify({'check in status': user.checked_in})
-
-"""
-Duplicate function.
-@bp.route('/<int:user_id>/appointments', methods=['GET'])
-def get_user_appointments_by_id(user_id):
-    user = User.query.get_or_404(user_id)
-    appointments = user.appointments
-
-    appointment_list = [{'id': appt.id, 'date': appt.date} for appt in appointments]
-    return jsonify(appointment_list)
-"""
+  
 
 @bp.route('/<int:user_id>/appointments/<int:appt_id>', methods=['GET'])
 def get_user_appointment_by_appt_id(user_id, appt_id):
     appt = Appointment.query.get_or_404(appt_id)
 
     return jsonify({'selected appointment': appt.as_dict()})
-
 
 
 
