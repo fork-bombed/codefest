@@ -21,7 +21,7 @@ class Appointment(db.Model):
     __tablename__ = 'appointments'
 
     id = db.Column(db.Integer, primary_key=True)
-    time = db.Column(db.Time)
+    date = db.Column(db.DateTime, nullable=True)
     duration = db.Column(db.Integer)
     client_id = db.Column(db.Integer, db.ForeignKey('clients.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
