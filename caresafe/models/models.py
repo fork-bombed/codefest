@@ -33,6 +33,10 @@ class Appointment(db.Model):
     def __repr__(self):
         return f'<Appointment {self.id}>'
 
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
 
 class User(db.Model):
     __tablename__ = 'users'
