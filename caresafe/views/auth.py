@@ -12,7 +12,6 @@ bp = Blueprint('auth', __name__, url_prefix='/auth')
 def auth_home():
     return jsonify({'message': 'Welcome to the auth page!'})
 
-
 @bp.route('/register', methods=['POST'])
 def register():
     data = request.get_json()

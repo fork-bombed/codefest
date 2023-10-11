@@ -24,13 +24,18 @@ class Appointment(db.Model):
     time = db.Column(db.Time)
     duration = db.Column(db.Integer)
     client_id = db.Column(db.Integer, db.ForeignKey('clients.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
 
     client = db.relationship('Client', back_populates='appointments')
-    users = db.relationship('User', back_populates='appointment')
+    user = db.relationship('User', back_populates='appointments')  
     panics = db.relationship('Panic', back_populates='appointment')
 
     def __repr__(self):
         return f'<Appointment {self.id}>'
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
 
 
 class User(db.Model):
@@ -41,9 +46,8 @@ class User(db.Model):
     password = db.Column(db.String, nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
     checked_in = db.Column(db.Boolean, default=False)
-    appointment_id = db.Column(db.Integer, db.ForeignKey('appointments.id'))
 
-    appointment = db.relationship('Appointment', back_populates='users')
+    appointments = db.relationship('Appointment', back_populates='user')
     panics = db.relationship('Panic', back_populates='user')
 
     def set_password(self, password):

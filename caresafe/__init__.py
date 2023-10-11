@@ -2,6 +2,7 @@ from flask import Flask
 from flask_bcrypt import Bcrypt
 from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
+import os
 
 load_dotenv()
 
@@ -11,7 +12,7 @@ db = SQLAlchemy()
 def create_app():
     app = Flask(__name__)
 
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://spaghetti:#penne23@spaggettihoopos.postgres.database.azure.com:5432/postgres'
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DB_URI")
     db.init_app(app)
     bcrypt.init_app(app)
 
@@ -37,3 +38,6 @@ def create_app():
         db.create_all()
     
     return app
+
+
+app = create_app()
