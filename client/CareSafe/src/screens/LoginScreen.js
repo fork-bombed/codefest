@@ -1,6 +1,8 @@
 // LoginScreen.js
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import {
   View,
   Text,
@@ -13,11 +15,42 @@ import {
 const LoginScreen = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [authToken, setAuthToken] = useState(null);
 
   const handleLogin = () => {
-    // Handle your login logic here
-    console.log('Login pressed with username:', username, 'and password:', password);
+    fetch('http://localhost:5000/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        username,
+        password,
+      }),
+    })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data.token) {
+        setAuthToken(data.token);
+        AsyncStorage.setItem('authToken', data.token);
+      } else {
+        // Handle error
+      }
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+    });
   };
+
+  useEffect(() => {
+    // Try to load token from storage
+    AsyncStorage.getItem('authToken')
+      .then((token) => {
+        if (token) {
+          setAuthToken(token);
+        }
+      });
+  }, []);
 
   return (
     <View style={styles.container}>
