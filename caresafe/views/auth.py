@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from caresafe.models.user import User
+from caresafe.models.models import User
 from caresafe import bcrypt
 from caresafe.definitions import SECRET_KEY
 from caresafe.services.auth_service import require_auth, generate_token
