@@ -1,9 +1,8 @@
 from flask import Blueprint, jsonify, request
-
-from caresafe import db
 from caresafe.services.auth_service import require_auth
 from caresafe.models.models import User, Panic, Appointment
 from sqlalchemy.exc import IntegrityError
+
 
 bp = Blueprint('user', __name__, url_prefix='/user')
 
@@ -25,7 +24,6 @@ def user_panic(user_id):
     appointment_id = request.json.get('appointment_id')
     panic = Panic(appointment_id=appointment_id, user_id=user_id)
     panic.save()
-
 
 @bp.route('/extend', methods=['POST'])
 @require_auth
@@ -68,21 +66,39 @@ def get_user_appointments(user_id):
     appointments = user.appointments
     return jsonify(
         {
-            'appointments': [
-                {
-                    'id': appointment.id,
-                    'time': appointment.time.strftime('%H:%M'),
-                    'duration': appointment.duration,
-                    'client_id': appointment.client_id,
-                    'user_id': appointment.user_id,
-                }
-                for appointment in appointments
-            ]
+            'appointments': [appointment.as_dict() for appointment in appointments]
         }
     )
 
 
-@bp.route('/appointments/<appointment_id>/decline', methods=['POST'])
+@bp.route('/checkin', methods=['POST'])
+@require_auth
+def check_in(user_id):
+    user = User.query.get(user_id)
+    user.checked_in = True
+    user.save()
+    return jsonify({'check in status': user.checked_in})
+
+
+@bp.route('/checkout', methods=['POST'])
+@require_auth
+def check_out(user_id):
+    user = User.query.get(user_id)
+    user.checked_in = False
+    user.save()
+    return jsonify({'check in status': user.checked_in})
+
+
+@bp.route('/<int:user_id>/appointments', methods=['GET'])
+def get_user_appointments(user_id):
+    user = User.query.get_or_404(user_id)
+    appointments = user.appointments
+
+    appointment_list = [{'id': appt.id, 'date': appt.date} for appt in appointments]
+    return jsonify(appointment_list)
+
+
+@bp.route('/appointments/<int:appointment_id>/decline', methods=['POST'])
 @require_auth
 def decline_appointment(user_id, appointment_id):
     to_status = 'declined'
