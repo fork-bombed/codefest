@@ -14,3 +14,12 @@ def user_home(user_id):
             'message': f'Welcome {user.username}!',
         }
     )
+
+
+@bp.route('/user/<int:id>/appointments', methods=['GET'])
+def get_user_appointments(user_id):
+    user = User.query.get_or_404(id)
+    appointments = user.appointments
+
+    appointment_list = [{'id': appt.id, 'time': appt.time} for appt in appointments]
+    return jsonify(appointment_list)

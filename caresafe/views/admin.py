@@ -8,3 +8,4 @@ bp = Blueprint('admin', __name__, url_prefix='/admin')
 @require_admin
 def admin_home(user_id):
     return jsonify({'message': 'Welcome to the admin page!'})
+
