@@ -17,6 +17,7 @@ def user_home(user_id):
     )
 
 
+<<<<<<< HEAD
 
 @bp.route('/panic', methods=['POST'])
 @require_auth
@@ -59,3 +60,24 @@ def extend_session(user_id):
     except Exception as e:
         db.session.rollback()  # Roll back changes on error
         return jsonify({'message': f'Failed to update: {str(e)}'}), 400
+=======
+@bp.route('/appointments', methods=['GET'])
+@require_auth
+def get_user_appointments(user_id):
+    user = User.query.get(user_id)
+    appointments = user.appointments
+    return jsonify(
+        {
+            'appointments': [
+                {
+                    'id': appointment.id,
+                    'time': appointment.time.strftime('%H:%M'),
+                    'duration': appointment.duration,
+                    'client_id': appointment.client_id,
+                    'user_id': appointment.user_id,
+                }
+                for appointment in appointments
+            ]
+        }
+    )
+>>>>>>> 09c4a4b (Add appointments and clients)
