@@ -17,3 +17,10 @@ def admin_home(user_id):
 def get_panic():
     panics = Panic.query.all()
     return jsonify({'panics': panics})
+
+
+@bp.route('/call_admin', methods=['GET'])
+def call_admin():
+    phone = "07733891033"
+    return jsonify({'phone': phone})
+
