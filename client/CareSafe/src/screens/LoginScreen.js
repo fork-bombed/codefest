@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -10,10 +10,42 @@ import {
   Alert
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useIsFocused } from '@react-navigation/native';
 
 export default function LoginScreen({ navigation }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+
+  const isFocused = useIsFocused();
+
+  useEffect(() => {
+    const checkToken = async () => {
+      try {
+        const token = await AsyncStorage.getItem('token');
+        if (token) {
+          const response = await fetch('http://localhost:5000/auth/refresh', {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            await AsyncStorage.setItem('token', data.token);
+            navigation.navigate('Appointments');
+          }
+        }
+      } catch (error) {
+        console.error('Error checking token', error);
+      }
+    };
+
+    if (isFocused) {
+      checkToken();
+    }
+  }, [navigation, isFocused]);
 
   const handleLogin = async () => {
     try {
@@ -66,7 +98,6 @@ export default function LoginScreen({ navigation }) {
       <TouchableOpacity onPress={handleLogin} style={styles.loginButton}>
         <Text style={styles.loginButtonText}>Login</Text>
       </TouchableOpacity>
-    <Button title="Login" onPress={() => navigation.navigate('Main')} />
     </View>
   );
 };

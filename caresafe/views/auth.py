@@ -12,6 +12,7 @@ bp = Blueprint('auth', __name__, url_prefix='/auth')
 def auth_home():
     return jsonify({'message': 'Welcome to the auth page!'})
 
+
 @bp.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
@@ -47,7 +48,7 @@ def login():
     return jsonify({'message': 'Invalid credentials'}), 401
 
 
-@bp.route('/refresh', methods=['POST'])
+@bp.route('/refresh', methods=['GET'])
 @require_auth
 def refresh_auth(user_id):
     user = User.query.get(user_id)
