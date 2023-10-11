@@ -25,6 +25,8 @@ def user_panic(user_id):
     appointment_id = request.json.get('appointment_id')
     panic = Panic(appointment_id=appointment_id, user_id=user_id)
     panic.save()
+    return jsonify({'message': 'Panic created', 'id': panic.id}), 201
+    
 
  
 @bp.route('/extend', methods=['POST'])
@@ -89,7 +91,20 @@ def check_out(user_id):
     user.checked_in = False
     user.save()
     return jsonify({'check in status': user.checked_in})
+<<<<<<< HEAD
   
+=======
+
+
+@bp.route('/<int:user_id>/appointments', methods=['GET'])
+def get_user_appointments_by_id(user_id):
+    user = User.query.get_or_404(user_id)
+    appointments = user.appointments
+
+    appointment_list = [{'id': appt.id, 'date': appt.date} for appt in appointments]
+    return jsonify(appointment_list)
+
+>>>>>>> 2942179 (don't panic)
 
 @bp.route('/<int:user_id>/appointments/<int:appt_id>', methods=['GET'])
 def get_user_appointment_by_appt_id(user_id, appt_id):
