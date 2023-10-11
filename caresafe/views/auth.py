@@ -13,6 +13,23 @@ def auth_home():
     return jsonify({'message': 'Welcome to the auth page!'})
 
 
+@bp.route('/extend', methods=['POST'])
+@require_auth
+def extend_session(user_id):
+
+    try:
+        data = request.get_json()
+        user = User.query.get(user_id)
+        extension = data.get('extension_time')
+        appointment_id = data.get('id')
+        appt = Appointment.query.filter_by(id=appointment_id).first()
+        appt.duration = appt.duration + int(extension)
+        appt.save()
+        return jsonify({'message': 'Appointment extended'}), 200
+    except:
+        return jsonify({'message': 'Failed to update'}), 400
+
+
 @bp.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
