@@ -18,10 +18,21 @@ def create_app():
     def init_db():
         db = SQLAlchemy(app)
         print("Database has been created!")
+
+    @app.cli.command("force-init-db")
+    def force_init_db():
+        db.drop_all()
+        print("Database has been dropped!")
+        db.create_all()
+        print("Database has been created!")
+    
     from caresafe.views import auth, admin, user
 
     app.register_blueprint(auth.bp)
     app.register_blueprint(admin.bp)
     app.register_blueprint(user.bp)
+
+    with app.app_context():
+        db.create_all()
     
     return app
