@@ -15,9 +15,29 @@ export default function LoginScreen({ navigation }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
-    // Handle your login logic here
-    console.log('Login pressed with username:', username, 'and password:', password);
+  const handleLogin = async () => {
+    try {
+      const response = await fetch('http://localhost:5000/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username: username, password: password })
+      });
+
+      if (!response.ok) {
+        throw new Error('Login failed');
+      }
+
+      const { token } = await response.json();
+      // Save the token to local storage
+      localStorage.setItem('token', token);
+      console.log('Login successful. Token:', token);
+      // Navigate to the main app screen
+      navigation.navigate('Main');
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
