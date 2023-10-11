@@ -19,7 +19,6 @@ def user_home(user_id):
     )
 
 
-
 @bp.route('/panic', methods=['POST'])
 @require_auth
 def user_panic(user_id):
@@ -27,11 +26,10 @@ def user_panic(user_id):
     panic = Panic(appointment_id=appointment_id, user_id=user_id)
     panic.save()
 
- 
+
 @bp.route('/extend', methods=['POST'])
 @require_auth
 def extend_session(user_id):
-
     try:
         data = request.get_json()
         extension = data.get('extension_time')
@@ -61,7 +59,7 @@ def extend_session(user_id):
     except Exception as e:
         db.session.rollback()  # Roll back changes on error
         return jsonify({'message': f'Failed to update: {str(e)}'}), 400
-    
+
 
 @bp.route('/appointments', methods=['GET'])
 @require_auth
@@ -82,3 +80,21 @@ def get_user_appointments(user_id):
             ]
         }
     )
+
+
+@bp.route('/appointments/<appointment_id>/decline', methods=['POST'])
+@require_auth
+def decline_appointment(user_id, appointment_id):
+    to_status = 'declined'
+    appointment = Appointment.query.get(appointment_id)
+
+    if not appointment:
+        return jsonify({'error': f'Appointment with ID {appointment_id} was not found.'}), 404
+
+    if user_id != appointment.user_id:
+        return jsonify({'error': f'Appointment with ID {appointment_id} does not belong to user with ID {user_id}.'}), 403
+
+    appointment.set_status(to_status)
+    appointment.save()
+    return jsonify({'status': to_status})
+
