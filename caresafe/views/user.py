@@ -16,9 +16,6 @@ def user_home(user_id):
         }
     )
 
-
-<<<<<<< HEAD
-
 @bp.route('/panic', methods=['POST'])
 @require_auth
 def user_panic(user_id):
