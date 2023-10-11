@@ -1,7 +1,6 @@
-from caresafe.models.models import Panic
 from flask import Blueprint, jsonify, request
 from caresafe.services.auth_service import require_auth, require_admin
-from caresafe.models.models import Appointment, Client
+from caresafe.models.models import Appointment, Client, Panic
 
 bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -17,7 +16,6 @@ def admin_home(user_id):
 def get_panic():
     panics = Panic.query.all()
     return jsonify({'panics': panics})
-
 
 
 @bp.route('/call_admin', methods=['GET'])
@@ -60,6 +58,21 @@ def get_appointments(user_id):
             ]
         }
     )
+
+
+@bp.route('/appointments/<appointment_id>/decline', methods=['POST'])
+@require_auth
+@require_admin
+def decline_appointment(user_id, appointment_id):
+    to_status = 'declined'
+    appointment = Appointment.query.get(appointment_id)
+
+    if not appointment:
+        return jsonify({'error': f'Appointment with ID {appointment_id} was not found.'}), 404
+
+    appointment.set_status(to_status)
+    appointment.save()
+    return jsonify({'status': to_status})
 
 
 @bp.route('/clients', methods=['POST'])

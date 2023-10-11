@@ -1,6 +1,7 @@
 from caresafe import db, bcrypt
 import datetime
 
+ALLOWED_STATUSES = ("active", "completed", "declined")
 
 class Client(db.Model):
     __tablename__ = 'clients'
@@ -38,6 +39,7 @@ class Appointment(db.Model):
     duration = db.Column(db.Integer)
     client_id = db.Column(db.Integer, db.ForeignKey('clients.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    status = db.Column(db.Enum('active', 'completed', 'declined', name='appt_status'), default='active')
 
     client = db.relationship('Client', back_populates='appointments')
     user = db.relationship('User', back_populates='appointments')  
@@ -50,17 +52,21 @@ class Appointment(db.Model):
     def set_date(self, date: str):
         self.date = datetime.datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
 
-    def save(self):
-        db.session.add(self)
-        db.session.commit()
+    def set_status(self, status: str):
+        if status.lower() in ALLOWED_STATUSES:
+            self.status = status.lower()
+        else:
+            print("set_status() function received an invalid status.")
 
     def as_dict(self):
         return {
             'id': self.id,
             'date': self.date.strftime('%Y-%m-%d %H:%M:%S'),
             'duration': self.duration,
+            'status': self.status,
             'client': self.client.as_dict(),
             'user': self.user.as_dict(),
+            'status': self.status
         }
 
     def __repr__(self):
