@@ -2,15 +2,16 @@ from flask import Blueprint, jsonify, request
 from caresafe.models.user import User
 from caresafe import bcrypt
 from caresafe.definitions import SECRET_KEY
-import datetime
-import os
-import jwt
+from caresafe.services.auth_service import require_auth, generate_token
+
 
 bp = Blueprint('auth', __name__, url_prefix='/auth')
+
 
 @bp.route('/')
 def auth_home():
     return jsonify({'message': 'Welcome to the auth page!'})
+
 
 @bp.route('/register', methods=['POST'])
 def register():
@@ -30,6 +31,7 @@ def register():
     new_user.save()
     return jsonify({'message': 'User registered'}), 201
 
+
 @bp.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
@@ -40,7 +42,15 @@ def login():
         return jsonify({'message': 'User not found'}), 401
     
     if bcrypt.check_password_hash(user.password, password):
-        token = jwt.encode({'user_id': user.id, 'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=5)}, SECRET_KEY)
+        token = generate_token(user)
         return jsonify({'token': token}), 200
 
     return jsonify({'message': 'Invalid credentials'}), 401
+
+
+@bp.route('/refresh', methods=['POST'])
+@require_auth
+def refresh_auth(user_id):
+    user = User.query.get(user_id)
+    token = generate_token(user)
+    return jsonify({'token': token}), 200

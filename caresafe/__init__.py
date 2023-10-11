@@ -20,6 +20,13 @@ def create_app():
     def init_db():
         db.create_all()
         print("Database has been created!")
+
+    @app.cli.command("force-init-db")
+    def force_init_db():
+        db.drop_all()
+        print("Database has been dropped!")
+        db.create_all()
+        print("Database has been created!")
     
     from caresafe.views import auth, admin, user
 
