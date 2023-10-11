@@ -19,4 +19,4 @@ Team Spaghetti Code for Codefest 11th-12th October 2023.
 
 4. **Digital Therapy Room** - Develop a video conferencing space so online counselling is deliveryable using creative activities.
 
-- There is no access to a suite of creative tools which could aid the therapeutic process for children and young people with Listening Ear's online therapy offer and video conferencing system (MS Teams)
+- There is no access to a suite of creative tools which could aid the therapeutic process for children and young people with Listening Ear's online therapy offer and video conferencing system (MS Teams 2.0)
