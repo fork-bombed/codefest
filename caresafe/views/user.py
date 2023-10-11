@@ -88,7 +88,8 @@ def check_out(user_id):
     user.save()
     return jsonify({'check in status': user.checked_in})
 
-
+"""
+Duplicate function.
 @bp.route('/<int:user_id>/appointments', methods=['GET'])
 def get_user_appointments(user_id):
     user = User.query.get_or_404(user_id)
@@ -96,7 +97,7 @@ def get_user_appointments(user_id):
 
     appointment_list = [{'id': appt.id, 'date': appt.date} for appt in appointments]
     return jsonify(appointment_list)
-
+"""
 
 @bp.route('/appointments/<int:appointment_id>/decline', methods=['POST'])
 @require_auth
