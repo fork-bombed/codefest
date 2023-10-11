@@ -1,9 +1,12 @@
+from sqlite3 import IntegrityError
+
 from flask import Blueprint, jsonify, request
 
 from caresafe import db
 from caresafe.services.auth_service import require_auth
 from caresafe.models.models import User, Panic, Appointment
 from sqlalchemy.exc import IntegrityError
+
 
 bp = Blueprint('user', __name__, url_prefix='/user')
 
@@ -25,8 +28,41 @@ def user_panic(user_id):
     appointment_id = request.json.get('appointment_id')
     panic = Panic(appointment_id=appointment_id, user_id=user_id)
     panic.save()
-    
+ 
+@bp.route('/extend', methods=['POST'])
+@require_auth
+def extend_session(user_id):
+    try:
+        data = request.get_json()
+        extension = data.get('extension_time')
+        appointment_id = data.get('appointment_id')
 
+        user = User.query.get(user_id)
+        appointment = Appointment.query.get(appointment_id)
+
+        if user is None:
+            return jsonify({'message': 'User not found'}), 404
+
+        if appointment is None:
+            return jsonify({'message': 'Appointment not found'}), 404
+
+        if user.id != appointment.user.id:
+            return jsonify({'message': 'Permission denied'}), 403
+
+        appointment.duration += int(extension)
+        db.session.commit()  # Commit changes to the database
+
+        return jsonify({'message': 'Appointment extended'}), 200
+
+    except (ValueError, IntegrityError) as e:
+        db.session.rollback()  # Roll back changes on error
+        return jsonify({'message': 'Invalid data or database error'}), 400
+
+    except Exception as e:
+        db.session.rollback()  # Roll back changes on error
+        return jsonify({'message': f'Failed to update: {str(e)}'}), 400
+
+      
 @bp.route('/appointments', methods=['GET'])
 @require_auth
 def get_user_appointments(user_id):
@@ -37,3 +73,21 @@ def get_user_appointments(user_id):
             'appointments': [appointment.as_dict() for appointment in appointments]
         }
     )
+
+
+@bp.route('/checkin', methods=['POST'])
+@require_auth
+def check_in(user_id):
+    user = User.query.get(user_id)
+    user.checked_in = True
+    user.save()
+    return jsonify({'check in status': user.checked_in})
+
+
+@bp.route('/checkout', methods=['POST'])
+@require_auth
+def check_out(user_id):
+    user = User.query.get(user_id)
+    user.checked_in = False
+    user.save()
+    return jsonify({'check in status': user.checked_in})
