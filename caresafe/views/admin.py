@@ -1,7 +1,6 @@
-from caresafe.models.models import Panic
 from flask import Blueprint, jsonify, request
 from caresafe.services.auth_service import require_auth, require_admin
-from caresafe.models.models import Appointment, Client
+from caresafe.models.models import Appointment, Client, Panic
 
 bp = Blueprint('admin', __name__, url_prefix='/admin')
 
@@ -35,6 +34,7 @@ def create_appointment(user_id):
     client_id = data.get('client_id')
     target_user_id = data.get('user_id')
     appointment = Appointment(duration=duration, client_id=client_id, user_id=target_user_id)
+    appointment.set_status("active")
     appointment.set_date(date)
     appointment.save()
     return jsonify({'message': 'Appointment created', 'id': appointment.id}), 201
@@ -59,6 +59,21 @@ def get_appointments(user_id):
             ]
         }
     )
+
+
+@bp.route('/appointments/<appointment_id>/decline', methods=['POST'])
+@require_auth
+@require_admin
+def decline_appointment(user_id, appointment_id):
+    to_status = 'declined'
+    appointment = Appointment.query.get(appointment_id)
+
+    if not appointment:
+        return jsonify({'error': f'Appointment with ID {appointment_id} was not found.'}), 404
+
+    appointment.set_status(to_status)
+    appointment.save()
+    return jsonify({'status': to_status})
 
 
 @bp.route('/clients', methods=['POST'])

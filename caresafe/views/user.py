@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from caresafe.services.auth_service import require_auth
 from caresafe.models.models import User, Panic, Appointment
 from sqlalchemy.exc import IntegrityError
@@ -96,3 +96,21 @@ def get_user_appointments(user_id):
 
     appointment_list = [{'id': appt.id, 'date': appt.date} for appt in appointments]
     return jsonify(appointment_list)
+
+
+@bp.route('/appointments/<int:appointment_id>/decline', methods=['POST'])
+@require_auth
+def decline_appointment(user_id, appointment_id):
+    to_status = 'declined'
+    appointment = Appointment.query.get(appointment_id)
+
+    if not appointment:
+        return jsonify({'error': f'Appointment with ID {appointment_id} was not found.'}), 404
+
+    if user_id != appointment.user_id:
+        return jsonify({'error': f'Appointment with ID {appointment_id} does not belong to user with ID {user_id}.'}), 403
+
+    appointment.set_status(to_status)
+    appointment.save()
+    return jsonify({'status': to_status})
+
