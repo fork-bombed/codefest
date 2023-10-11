@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_bcrypt import Bcrypt
+from flask_cors import CORS
 from dotenv import load_dotenv
 from flask_sqlalchemy import SQLAlchemy
 import os
@@ -15,6 +16,7 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DB_URI")
     db.init_app(app)
     bcrypt.init_app(app)
+    CORS(app)
 
     @app.cli.command("init-db")
     def init_db():
