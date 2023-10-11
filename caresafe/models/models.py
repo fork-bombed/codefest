@@ -72,6 +72,10 @@ class Panic(db.Model):
     appointment = db.relationship('Appointment', back_populates='panics')
     user = db.relationship('User', back_populates='panics')
 
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
+
     def __repr__(self) -> str:
         return f'<Panic {self.id} {self.user} {self.appointment}>'
     
