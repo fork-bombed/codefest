@@ -33,5 +33,8 @@ def create_app():
     app.register_blueprint(auth.bp)
     app.register_blueprint(admin.bp)
     app.register_blueprint(user.bp)
+
+    with app.app_context():
+        db.create_all()
     
     return app
