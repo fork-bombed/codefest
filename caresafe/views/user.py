@@ -1,8 +1,4 @@
-from sqlite3 import IntegrityError
-
-from flask import Blueprint, jsonify, request
-
-from caresafe import db
+from flask import Blueprint, jsonify
 from caresafe.services.auth_service import require_auth
 from caresafe.models.models import User, Panic, Appointment
 from sqlalchemy.exc import IntegrityError
@@ -28,7 +24,7 @@ def user_panic(user_id):
     appointment_id = request.json.get('appointment_id')
     panic = Panic(appointment_id=appointment_id, user_id=user_id)
     panic.save()
- 
+
 @bp.route('/extend', methods=['POST'])
 @require_auth
 def extend_session(user_id):
@@ -62,7 +58,7 @@ def extend_session(user_id):
         db.session.rollback()  # Roll back changes on error
         return jsonify({'message': f'Failed to update: {str(e)}'}), 400
 
-      
+
 @bp.route('/appointments', methods=['GET'])
 @require_auth
 def get_user_appointments(user_id):
@@ -91,3 +87,12 @@ def check_out(user_id):
     user.checked_in = False
     user.save()
     return jsonify({'check in status': user.checked_in})
+
+
+@bp.route('/<int:user_id>/appointments', methods=['GET'])
+def get_user_appointments(user_id):
+    user = User.query.get_or_404(user_id)
+    appointments = user.appointments
+
+    appointment_list = [{'id': appt.id, 'date': appt.date} for appt in appointments]
+    return jsonify(appointment_list)
