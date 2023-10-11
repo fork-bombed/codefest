@@ -34,7 +34,6 @@ def create_appointment(user_id):
     client_id = data.get('client_id')
     target_user_id = data.get('user_id')
     appointment = Appointment(duration=duration, client_id=client_id, user_id=target_user_id)
-    appointment.set_status("active")
     appointment.set_date(date)
     appointment.save()
     return jsonify({'message': 'Appointment created', 'id': appointment.id}), 201

@@ -37,10 +37,9 @@ class Appointment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.DateTime, nullable=True)
     duration = db.Column(db.Integer)
-    status = db.Column(db.String)
     client_id = db.Column(db.Integer, db.ForeignKey('clients.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    status = db.Column(db.Enum('Active', 'Past', 'Declined', name='appointment_status'), default='Active')
+    status = db.Column(db.Enum('active', 'completed', 'declined', name='appt_status'), default='active')
 
     client = db.relationship('Client', back_populates='appointments')
     user = db.relationship('User', back_populates='appointments')  
