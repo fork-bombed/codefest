@@ -26,7 +26,6 @@ def user_panic(user_id):
     panic = Panic(appointment_id=appointment_id, user_id=user_id)
     panic.save()
     return jsonify({'message': 'Panic created', 'id': panic.id}), 201
-    
 
  
 @bp.route('/extend', methods=['POST'])
