@@ -1,7 +1,13 @@
 from flask import Blueprint, jsonify, request
+from datetime import datetime, timedelta
+from sqlite3 import IntegrityError
+
+
+from caresafe import db, scheduler
 from caresafe.services.auth_service import require_auth
 from caresafe.models.models import User, Panic, Appointment
 from sqlalchemy.exc import IntegrityError
+import uuid
 from caresafe import db
 
 
@@ -26,9 +32,17 @@ def user_panic(user_id):
     panic = Panic(appointment_id=appointment_id, user_id=user_id)
     panic.save()
     return jsonify({'message': 'Panic created', 'id': panic.id}), 201
-    
 
- 
+
+
+
+
+@bp.route('/call_admin', methods=['GET'])
+def call_admin():
+    phone = "07733891033"
+    return jsonify({'phone': phone})
+
+
 @bp.route('/extend', methods=['POST'])
 @require_auth
 def extend_session(user_id):
@@ -62,7 +76,7 @@ def extend_session(user_id):
         db.session.rollback()  # Roll back changes on error
         return jsonify({'message': f'Failed to update: {str(e)}'}), 400
 
-      
+
 @bp.route('/appointments', methods=['GET'])
 @require_auth
 def get_user_appointments(user_id):
@@ -81,7 +95,17 @@ def check_in(user_id):
     user = User.query.get(user_id)
     user.checked_in = True
     user.save()
+    ten_min_check_in(user_id)
     return jsonify({'check in status': user.checked_in})
+
+
+@bp.route('/second-checkin', methods=['POST'])
+@require_auth
+def second_check_in(user_id):
+    user = User.query.get(user_id)
+    user.check_in_2 = True
+    user.save()
+    return jsonify({'second check in status': user.checked_in})
 
 
 @bp.route('/checkout', methods=['POST'])
@@ -125,3 +149,21 @@ def decline_appointment(user_id, appointment_id):
     appointment.save()
     return jsonify({'status': to_status})
 
+
+
+def second_check_in_checker(user_id):
+    user = User.query.get(user_id)
+    if not user.second_check_in:
+        delayed_panic()
+
+
+def ten_min_check_in(user_id):
+    job_id = str(uuid.uuid4())
+    scheduler.add_job(func=second_check_in_checker, run_date=datetime.now() + timedelta(seconds=5), args=[user_id],
+                      id=job_id)
+
+
+def delayed_panic():
+    job_id = str(uuid.uuid4())
+
+    scheduler.add_job(func=user_panic, run_date=datetime.now() + timedelta(seconds=5), id=job_id)
