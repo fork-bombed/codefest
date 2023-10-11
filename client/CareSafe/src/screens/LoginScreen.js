@@ -9,6 +9,7 @@ import {
   StyleSheet,
   TextInput,
   Image,
+  Button,
   TouchableOpacity
 } from 'react-native';
 
@@ -77,9 +78,12 @@ const LoginScreen = () => {
       <TouchableOpacity onPress={handleLogin} style={styles.loginButton}>
         <Text style={styles.loginButtonText}>Login</Text>
       </TouchableOpacity>
+    <Button title="Login" onPress={() => navigation.navigate('Main')} />
     </View>
   );
 };
+
+
 
 const styles = StyleSheet.create({
   container: {

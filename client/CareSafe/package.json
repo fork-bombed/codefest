@@ -19,6 +19,8 @@
     "react": "18.2.0",
     "react-dom": "^18.2.0",
     "react-native": "0.72.5",
+    "react-native-maps": "^1.8.0",
+    "react-native-sliding-up-panel": "^1.1.12",
     "react-native-web": "^0.19.9"
   },
   "devDependencies": {
