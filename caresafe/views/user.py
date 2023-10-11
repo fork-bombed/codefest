@@ -1,7 +1,8 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from caresafe.services.auth_service import require_auth
 from caresafe.models.models import User, Panic, Appointment
 from sqlalchemy.exc import IntegrityError
+from caresafe import db
 
 
 bp = Blueprint('user', __name__, url_prefix='/user')
@@ -90,9 +91,17 @@ def check_out(user_id):
 
 
 @bp.route('/<int:user_id>/appointments', methods=['GET'])
-def get_user_appointments(user_id):
+def get_user_appointments_by_id(user_id):
     user = User.query.get_or_404(user_id)
     appointments = user.appointments
 
     appointment_list = [{'id': appt.id, 'date': appt.date} for appt in appointments]
     return jsonify(appointment_list)
+
+
+@bp.route('/<int:user_id>/appointments/<int:appt_id>', methods=['GET'])
+def get_user_appointment_by_appt_id(user_id, appt_id):
+    appt = Appointment.query.get_or_404(appt_id)
+
+    return jsonify({'selected appointment': appt.as_dict()})
+

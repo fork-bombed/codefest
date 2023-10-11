@@ -38,6 +38,7 @@ class Appointment(db.Model):
     duration = db.Column(db.Integer)
     client_id = db.Column(db.Integer, db.ForeignKey('clients.id'))
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    status = db.Column(db.Enum('Active', 'Past', 'Declined', name='appointment_status'), default='Active')
 
     client = db.relationship('Client', back_populates='appointments')
     user = db.relationship('User', back_populates='appointments')  
@@ -61,6 +62,7 @@ class Appointment(db.Model):
             'duration': self.duration,
             'client': self.client.as_dict(),
             'user': self.user.as_dict(),
+            'status': self.status
         }
 
     def __repr__(self):
