@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, Alert, Animated, PanResponder } from 'react-native';
+import { View, Text, StyleSheet, Alert, Animated, PanResponder, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import '@react-navigation/native';
 
@@ -46,10 +46,34 @@ const CurrentAppointmentScreen = () => {
         },
     });
 
+    const checkoutTranslateX = useRef(new Animated.Value(0)).current;
+    const checkoutPanResponder = PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onPanResponderMove: Animated.event([null, { dx: checkoutTranslateX }], { useNativeDriver: false }),
+        onPanResponderRelease: () => {
+            if (checkoutTranslateX.__getValue() <= -150) {
+                // Add the logic to hit the /user/appointments/<id>/checkout endpoint here.
+                // After the successful hit, you may want to set the user as checked out.
+                setCheckedIn(false); 
+                Animated.timing(checkoutTranslateX, {
+                    toValue: 0,
+                    duration: 300,
+                    useNativeDriver: false,
+                }).start();
+            } else {
+                Animated.spring(checkoutTranslateX, {
+                    toValue: 0,
+                    useNativeDriver: false,
+                }).start();
+            }
+        },
+    });
+    
+
     const onCheckIn = async () => {
         try {
             const token = await AsyncStorage.getItem('token');
-            const response = await fetch(`https://caresafe.azurewebsites.net/user/appointment/${currentAppointment.id}/checkin`, {
+            const response = await fetch(`https://caresafe.azurewebsites.net/user/appointments/${currentAppointment.id}/checkin`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -184,6 +208,29 @@ const CurrentAppointmentScreen = () => {
 
     if (!currentAppointment) return <Text>No current appointment.</Text>;
 
+    const handleEmergency = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            const response = await fetch(`https://caresafe.azurewebsites.net/user/appointments/${currentAppointment.id}/panic`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+    
+            if (!response.ok) {
+                throw new Error('Failed to send emergency');
+            }
+    
+            // Successfully sent emergency alert
+            Alert.alert("Alert", "Emergency signal sent.");
+        } catch (error) {
+            console.error(error);
+            Alert.alert("Error", "Failed to send emergency signal.");
+        }
+    };
+
     return (
         <View style={styles.container}>
             <View style={styles.card}>
@@ -208,9 +255,28 @@ const CurrentAppointmentScreen = () => {
                     </Animated.View>
                 </View>
             ) : (
-                <View style={styles.checkedInBox}>
-                    <Text style={styles.checkedInText}>Checked In</Text>
-                </View>
+                <>
+                    <View style={styles.checkedInBox}>
+                        <Text style={styles.checkedInText}>Checked In</Text>
+                    </View>
+                    <View style={styles.divider} />
+                    <TouchableOpacity style={styles.emergencyButton} onPress={handleEmergency}>
+                        <Text style={styles.buttonText}>Emergency</Text>
+                    </TouchableOpacity>
+                    <View style={styles.buttonRow}>
+                        <TouchableOpacity style={styles.extendButton} onPress={() => {/* Add appropriate handler here */}}>
+                            <Text style={styles.buttonText}>Extend Appointment</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.cancelButton} onPress={() => {/* Add appropriate handler here */}}>
+                            <Text style={styles.buttonText}>Cancel Appointment</Text>
+                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.sliderContainer}>
+                        <Animated.View {...checkoutPanResponder.panHandlers} style={[styles.sliderOutButton, { transform: [{ translateX: checkoutTranslateX }] }]}>
+                            <Text style={styles.sliderOutText}>Check Out</Text>
+                        </Animated.View>
+                    </View>
+                </>
             )}
         </View>
     );
@@ -268,8 +334,23 @@ const styles = StyleSheet.create({
         marginBottom: 5,
         marginLeft: 2
     },
+    sliderOutButton: {
+        width: 125,
+        height: 55,
+        borderRadius: 30,  // Half of height to get a circular shape.
+        backgroundColor: '#f8de7e',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginTop: 5,
+        marginBottom: 5,
+        marginLeft: 2
+    },
     sliderText: {
         color: '#fff',
+        fontWeight: 'bold',
+    },
+    sliderOutText: {
+        color: '#000',
         fontWeight: 'bold',
     },
     checkedInBox: {
@@ -285,6 +366,47 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: 'bold',
     },
+    emergencyButton: {
+        marginTop: 15,
+        padding: 60, // double the height
+        backgroundColor: '#D21F3C', // raspberry
+        borderRadius: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    buttonRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        marginTop: 15,
+    },
+    extendButton: {
+        flex: 1,
+        marginRight: 5,
+        padding: 15,
+        backgroundColor: '#1E90FF',  // darker blue
+        borderRadius: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    cancelButton: {
+        flex: 1,
+        marginLeft: 5,
+        padding: 15,
+        backgroundColor: '#808080',  // dark-medium grey
+        borderRadius: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    buttonText: {
+        color: 'white',
+        fontWeight: 'bold',
+    },
+    divider: {
+        marginTop: 20,
+        marginBottom: 10,
+        height: 2,
+        backgroundColor: '#eee',
+    }
 });
 
 export default CurrentAppointmentScreen;
