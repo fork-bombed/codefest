@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Alert } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, Alert, Animated, Easing, TouchableWithoutFeedback } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';  // <-- Import from react-native-gesture-handler
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const AppointmentScreen = () => {
+const AppointmentScreen = ({ navigation }) => {
     const [appointments, setAppointments] = useState([]);
 
     useEffect(() => {
@@ -46,6 +46,33 @@ const AppointmentScreen = () => {
         fetchData();
     }, []);
 
+    const pulseAnimation = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        Animated.loop(
+            Animated.sequence([
+                Animated.timing(pulseAnimation, {
+                    toValue: 1,
+                    duration: 1000,
+                    easing: Easing.sin,
+                    useNativeDriver: true
+                }),
+                Animated.timing(pulseAnimation, {
+                    toValue: 0,
+                    duration: 1000,
+                    easing: Easing.sin,
+                    useNativeDriver: true
+                })
+            ])
+        ).start();
+    }, []);
+
+    // Interpolate background color or border color
+    const cardBackgroundColor = pulseAnimation.interpolate({
+        inputRange: [0, 1],
+        outputRange: ['#ffe6cc', '#ffd9b3'] // You can adjust these colors as needed
+    });
+
     const isCurrentAppointment = (appointment) => {
         const now = new Date();
         const appointmentStart = new Date(appointment.date);
@@ -54,36 +81,44 @@ const AppointmentScreen = () => {
         return now >= appointmentStart && now <= appointmentEnd;
     };
 
+    const handleAppointmentClick = () => {
+        navigation.navigate('Appointment');
+    };
+
     return (
         <ScrollView style={styles.container}>
             {appointments.map((appointment, index) => (
-                <View 
-                    key={appointment.id} 
+                <Animated.View
+                    key={appointment.id}
                     style={[
-                        styles.card, 
-                        index === 0 ? (isCurrentAppointment(appointment) ? styles.currentAppointmentCard : styles.firstCard) : {}
+                        styles.card,
+                        index === 0 ? (isCurrentAppointment(appointment) ? 
+                            [styles.currentAppointmentCard, { backgroundColor: cardBackgroundColor }] :
+                            styles.firstCard) : {}
                     ]}
                 >
                     {index === 0 ? (
                         <>
-                            <View style={styles.topCardLayout}>
-                                <View>
-                                    <Text style={isCurrentAppointment(appointment) ? styles.currentAppointmentText : styles.nextAppointmentText}>
-                                        {isCurrentAppointment(appointment) ? "Current Appointment" : "Next Appointment"}
-                                    </Text>
-                                    <Text style={styles.nextAppointmentTime}>
-                                        {new Date(appointment.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                    </Text>
+                            <TouchableWithoutFeedback onPress={handleAppointmentClick}>
+                                <View style={styles.topCardLayout}>
+                                    <View>
+                                        <Text style={isCurrentAppointment(appointment) ? styles.currentAppointmentText : styles.nextAppointmentText}>
+                                            {isCurrentAppointment(appointment) ? "Current Appointment" : "Next Appointment"}
+                                        </Text>
+                                        <Text style={styles.nextAppointmentTime}>
+                                            {new Date(appointment.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                        </Text>
+                                    </View>
+                                    <View style={styles.rightAlign}>
+                                        <Text style={styles.clientName}>
+                                            {appointment.client.first_name} {appointment.client.last_name}
+                                        </Text>
+                                        <Text style={styles.address}>
+                                            {appointment.client.address}
+                                        </Text>
+                                    </View>
                                 </View>
-                                <View style={styles.rightAlign}>
-                                    <Text style={styles.clientName}>
-                                        {appointment.client.first_name} {appointment.client.last_name}
-                                    </Text>
-                                    <Text style={styles.address}>
-                                        {appointment.client.address}
-                                    </Text>
-                                </View>
-                            </View>
+                            </TouchableWithoutFeedback>
                         </>
                     ) : (
                         <>
@@ -102,7 +137,7 @@ const AppointmentScreen = () => {
                             </Text>
                         </>
                     )}
-                </View>
+                </Animated.View>
             ))}
         </ScrollView>
     );

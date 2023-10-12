@@ -4,7 +4,7 @@ import { WebView } from 'react-native-webview';
 import { PanGestureHandler, State } from 'react-native-gesture-handler';
 import AppointmentScreen from './AppointmentScreen';
 
-const MainScreen = () => {
+const MainScreen = ({ navigation }) => {
   const htmlContent = `
     <html>
     <head>
@@ -99,7 +99,7 @@ const MainScreen = () => {
           <View style={styles.panelContent}>
             <View style={styles.panelHandle} />
           </View>
-          <AppointmentScreen />
+          <AppointmentScreen navigation={navigation} />
         </Animated.View>
       </PanGestureHandler>
     </View>
