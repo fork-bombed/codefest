@@ -12,7 +12,7 @@ import uuid
 
 bp = Blueprint('user', __name__, url_prefix='/user')
 
-@bp.route('/', methods=['GET'])
+@bp.route('', methods=['GET'])
 @require_auth
 def user_home(user_id):
     user = User.query.get(user_id)
