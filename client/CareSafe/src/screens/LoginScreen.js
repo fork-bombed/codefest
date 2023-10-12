@@ -22,7 +22,7 @@ export default function LoginScreen({ navigation }) {
       try {
         const token = await AsyncStorage.getItem('token');
         if (token) {
-          const response = await fetch('http://localhost:5000/auth/refresh', {
+          const response = await fetch('https://caresafe.azurewebsites.net/auth/refresh', {
             method: 'GET',
             headers: {
               'Authorization': `Bearer ${token}`,
@@ -33,7 +33,7 @@ export default function LoginScreen({ navigation }) {
           if (response.ok) {
             const data = await response.json();
             await AsyncStorage.setItem('token', data.token);
-            navigation.navigate('Appointments');
+            navigation.navigate('Main');
           }
         }
       } catch (error) {
@@ -48,7 +48,7 @@ export default function LoginScreen({ navigation }) {
 
   const handleLogin = async () => {
     try {
-      const response = await fetch('http://localhost:5000/auth/login', {
+      const response = await fetch('https://caresafe.azurewebsites.net/auth/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -65,7 +65,7 @@ export default function LoginScreen({ navigation }) {
       await AsyncStorage.setItem('token', token);
       console.log('Login successful. Token:', token);
       // Navigate to the main app screen
-      navigation.navigate('Appointments');
+      navigation.navigate('Main');
     } catch (error) {
       console.error(error);
       Alert.alert("Error", "Login failed. Please check your credentials.");

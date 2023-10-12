@@ -1,69 +1,54 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
-import { MapContainer, TileLayer } from 'react-leaflet';
-import { SwipeablePanel } from 'rn-swipeable-panel';
+import React from 'react';
+import { StyleSheet, View } from 'react-native';
+import { WebView } from 'react-native-webview';
 
 const MainScreen = () => {
-    const centerPosition = [51.505, -0.09]; // Sample latitude and longitude. You can replace with your preferred coordinates
-
-    // useEffect(() => {
-    //     document.body.style.overflow = "hidden";
-     
-    //     return () => {
-    //        document.body.style.overflow = "auto";
-    //     }
-    //  }, []);
-
-    const [panelProps, setPanelProps] = useState({
-        fullWidth: true,
-        openLarge: true,
-        showCloseButton: true,
-        style: {overflow: 'hidden'},
-        closeOnTouchOutside: true,
-        allowTouchOutside: true,
-        showCloseButton: false,
-        onClose: () => closePanel(),
-        onPressCloseButton: () => closePanel(),
-        // ...or any prop you want
-      });
-      const [isPanelActive, setIsPanelActive] = useState(true);
-    
-      const openPanel = () => {
-        setIsPanelActive(true);
-      };
-    
-      const closePanel = () => {
-        setIsPanelActive(true);
-      };
+  const htmlContent = `
+    <html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+        <style>
+            body { padding: 0; margin: 0; }
+            html, body, #map { height: 100%; width: 100%; }
+        </style>
+    </head>
+    <body>
+    <div id="map"></div>
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        var map = L.map('map', {
+            center: [51.505, -0.09],
+            zoom: 13,
+            zoomControl: false  // This disables the zoom control
+        });
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: ''
+        }).addTo(map);
+    </script>
+    </body>
+    </html>
+  `;
 
   return (
-    <View style={{flex: 1, overflow: 'hidden'}}>
-        <SwipeablePanel {...panelProps} isActive={isPanelActive}>
-            <View style={{ height: 40, backgroundColor: 'white', alignItems: 'center', justifyContent: 'center' }}>
-            <Text>Swipe Up Panel Content</Text>
-            </View>
-        </SwipeablePanel>
-    <View style={{flex: 1}}>
-  <MapContainer center={centerPosition} zoom={13} style={{ width: '100vw', height: '100vh' }}>
-      <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    <View style={styles.container}>
+      <WebView 
+        source={{ html: htmlContent }}
+        style={styles.webView}
+        scalesPageToFit={true}
       />
-    </MapContainer>
     </View>
-    </View>
-    
-    
   );
+};
 
-    const styles = StyleSheet.create({
-      container: {
-        flex: 1,
-      },
-      map: {
-        ...StyleSheet.absoluteFillObject,
-      },
-    });
-}
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  webView: {
+    flex: 1,
+  },
+});
 
 export default MainScreen;

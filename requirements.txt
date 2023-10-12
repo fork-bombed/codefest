@@ -14,3 +14,4 @@ python-dotenv==1.0.0
 SQLAlchemy==1.4.48
 typing_extensions==4.8.0
 Werkzeug==2.0.0
+Flask-APScheduler==1.13.0
