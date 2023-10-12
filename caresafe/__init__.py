@@ -23,12 +23,6 @@ def create_app():
     if scheduler.state == 0:
         scheduler.init_app(app)
         scheduler.start()
-    CORS(app)
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    with app.app_context():
-        db.init_app(app)
-        bcrypt.init_app(app)
-        CORS(app)
 
     @app.cli.command("init-db")
     def init_db():
