@@ -24,8 +24,15 @@ const AppointmentScreen = () => {
                     }
                     
                     const data = await response.json();
+                    const now = new Date();
+
                     const filteredAndSorted = data.appointments
-                        .filter(app => new Date(app.date) >= new Date())  // Only future appointments
+                        .filter(app => {
+                            const appointmentStart = new Date(app.date);
+                            const appointmentEnd = new Date(app.date);
+                            appointmentEnd.setMinutes(appointmentEnd.getMinutes() + app.duration);
+                            return appointmentStart <= now && now <= appointmentEnd || now <= appointmentStart;
+                        })  
                         .sort((a, b) => new Date(a.date) - new Date(b.date));  // Sort by date
 
                     setAppointments(filteredAndSorted);
@@ -39,6 +46,14 @@ const AppointmentScreen = () => {
         fetchData();
     }, []);
 
+    const isCurrentAppointment = (appointment) => {
+        const now = new Date();
+        const appointmentStart = new Date(appointment.date);
+        const appointmentEnd = new Date(appointment.date);
+        appointmentEnd.setMinutes(appointmentEnd.getMinutes() + appointment.duration);
+        return now >= appointmentStart && now <= appointmentEnd;
+    };
+
     return (
         <ScrollView style={styles.container}>
             {appointments.map((appointment, index) => (
@@ -46,28 +61,30 @@ const AppointmentScreen = () => {
                     key={appointment.id} 
                     style={[
                         styles.card, 
-                        index === 0 
-                            ? styles.firstCard 
-                            : {}
+                        index === 0 ? (isCurrentAppointment(appointment) ? styles.currentAppointmentCard : styles.firstCard) : {}
                     ]}
                 >
-                    {index === 0 && new Date(appointment.date).toDateString() === new Date().toDateString() ? (
-                        <View style={styles.topCardLayout}>
-                            <View>
-                                <Text style={styles.nextAppointmentText}>Next appointment</Text>
-                                <Text style={styles.nextAppointmentTime}>
-                                    {new Date(appointment.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                </Text>
+                    {index === 0 ? (
+                        <>
+                            <View style={styles.topCardLayout}>
+                                <View>
+                                    <Text style={isCurrentAppointment(appointment) ? styles.currentAppointmentText : styles.nextAppointmentText}>
+                                        {isCurrentAppointment(appointment) ? "Current Appointment" : "Next Appointment"}
+                                    </Text>
+                                    <Text style={styles.nextAppointmentTime}>
+                                        {new Date(appointment.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    </Text>
+                                </View>
+                                <View style={styles.rightAlign}>
+                                    <Text style={styles.clientName}>
+                                        {appointment.client.first_name} {appointment.client.last_name}
+                                    </Text>
+                                    <Text style={styles.address}>
+                                        {appointment.client.address}
+                                    </Text>
+                                </View>
                             </View>
-                            <View style={styles.rightAlign}>
-                                <Text style={styles.clientName}>
-                                    {appointment.client.first_name} {appointment.client.last_name}
-                                </Text>
-                                <Text style={styles.address}>
-                                    {appointment.client.address}
-                                </Text>
-                            </View>
-                        </View>
+                        </>
                     ) : (
                         <>
                             <Text style={styles.dateAndTime}>
@@ -112,8 +129,15 @@ const styles = StyleSheet.create({
         backgroundColor: '#e6ffe6',  // Slight green tint
         borderColor: '#e6ffe6',
     },
+    currentAppointmentCard: {
+        shadowOpacity: 1,
+        backgroundColor: '#ffe6cc',  // Slight orange tint
+        borderColor: '#ffe6cc',
+    },
     rightAlign: {
         alignItems: 'flex-end',
+        marginLeft: -10,
+        marginTop: -15,
     },
     dateAndTime: {
         fontSize: 18,
@@ -130,14 +154,10 @@ const styles = StyleSheet.create({
         color: '#777',
     },
     nextAppointmentText: {
-        fontSize: 20,
-        fontWeight: 'bold',
-        marginBottom: 10,
+        fontSize: 14,
     },
-    nextAppointmentTime: {
-        fontSize: 24,
-        fontWeight: 'bold',
-        marginBottom: 20,
+    currentAppointmentText: {
+        fontSize: 14,
     },
     topCardLayout: {
         flexDirection: 'row',
@@ -145,13 +165,8 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         flex: 1,
     },
-    nextAppointmentText: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        marginBottom: 5,
-    },
     nextAppointmentTime: {
-        fontSize: 20,
+        fontSize: 24,
         fontWeight: 'bold',
     },
 });
