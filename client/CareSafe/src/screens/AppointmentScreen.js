@@ -59,7 +59,7 @@ const AppointmentScreen = () => {
                                     {new Date(appointment.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                                 </Text>
                             </View>
-                            <View>
+                            <View style={styles.rightAlign}>
                                 <Text style={styles.clientName}>
                                     {appointment.client.first_name} {appointment.client.last_name}
                                 </Text>
@@ -109,9 +109,11 @@ const styles = StyleSheet.create({
     },
     firstCard: {
         shadowOpacity: 1,
-        borderWidth: 0,
-        backgroundColor: '#ffffff',
-        borderColor: '#ffffff',
+        backgroundColor: '#e6ffe6',  // Slight green tint
+        borderColor: '#e6ffe6',
+    },
+    rightAlign: {
+        alignItems: 'flex-end',
     },
     dateAndTime: {
         fontSize: 18,
