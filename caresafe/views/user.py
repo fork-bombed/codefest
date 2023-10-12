@@ -12,7 +12,6 @@ import uuid
 
 bp = Blueprint('user', __name__, url_prefix='/user')
 
-
 @bp.route('/')
 @require_auth
 def user_home(user_id):
@@ -27,7 +26,6 @@ def user_home(user_id):
 @bp.route('/appointments/<int:appt_id>/panic', methods=['POST'])
 @require_auth
 def user_panic(user_id, appt_id):
-    # appointment_id = request.json.get('appointment_id')
     panic = Panic(appointment_id=appt_id, user_id=user_id)
     panic.save()
     return jsonify({'message': 'Panic created', 'id': panic.id}), 201
@@ -88,8 +86,10 @@ def get_user_appointments(user_id):
 @bp.route('/appointments/<int:appt_id>/checkin', methods=['POST'])
 @require_auth
 def check_in(user_id, appt_id):
+    timestamp = request.json.get('timestamp')
     user = User.query.get(user_id)
     user.checked_in = True
+    user.check_in_ts = timestamp
     user.save()
     ten_min_check_in(user, appt_id)
     return jsonify({'check in status': user.checked_in})
@@ -98,8 +98,10 @@ def check_in(user_id, appt_id):
 @bp.route('/appointments/<int:appt_id>/second-checkin', methods=['POST'])
 @require_auth
 def second_check_in(user_id):
+    timestamp = request.json.get('timestamp')
     user = User.query.get(user_id)
     user.check_in_2 = True
+    user.check_in_2_ts = timestamp
     user.save()
     return jsonify({'second check in status': user.checked_in})
 
@@ -149,11 +151,13 @@ def ten_min_check_in(user, appt_id):
 
 
 def call_panic_interm(user, appt_id):
+    from caresafe import app
     panic = Panic(appointment_id=appt_id, user_id=user.id)
-    panic.save()
+    with app.app_context():
+        panic.save()
 
 
 def delayed_panic(user, appt_id):
     job_id = str(uuid.uuid4())
-    scheduler.add_job(func=call_panic_interm, run_date=datetime.now() + timedelta(seconds=5), args=[user, appt_id],
-                      id=job_id)
+    scheduler.add_job(func=call_panic_interm, run_date=datetime.now() + timedelta(seconds=5),
+                      args=[user, appt_id], id=job_id)

@@ -17,8 +17,8 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DB_URI")
     db.init_app(app)
     bcrypt.init_app(app)
-    # scheduler.init_app(app)
     if scheduler.state == 0:
+        scheduler.init_app(app)
         scheduler.start()
     CORS(app)
 
