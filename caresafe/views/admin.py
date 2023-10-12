@@ -18,16 +18,10 @@ def get_panic():
     return jsonify({'panics': [panic.as_dict() for panic in panics]})
 
 
-@bp.route('/panic', methods=['POST'])
-@require_auth
-@require_admin
-def create_panic(user_id):
-    data = request.get_json()
-    appointment_id = data.get('appointment_id')
-    user_id = data.get('user_id')
-    panic = Panic(appointment_id=appointment_id, user_id=user_id)
-    panic.save()
-    return jsonify({'message': 'Panic created', 'id': panic.id}), 201
+@bp.route('/call_admin', methods=['GET'])
+def call_admin():
+    phone = "07733891033"
+    return jsonify({'phone': phone})
 
 
 @bp.route('/appointments', methods=['POST'])
