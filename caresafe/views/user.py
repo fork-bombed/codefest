@@ -8,7 +8,6 @@ from caresafe.services.auth_service import require_auth
 from caresafe.models.models import User, Panic, Appointment
 from sqlalchemy.exc import IntegrityError
 import uuid
-from caresafe import db
 
 
 bp = Blueprint('user', __name__, url_prefix='/user')
@@ -25,16 +24,13 @@ def user_home(user_id):
     )
 
 
-@bp.route('/panic', methods=['POST'])
+@bp.route('/appointments/<int:appt_id>/panic', methods=['POST'])
 @require_auth
-def user_panic(user_id):
-    appointment_id = request.json.get('appointment_id')
-    panic = Panic(appointment_id=appointment_id, user_id=user_id)
+def user_panic(user_id, appt_id):
+    # appointment_id = request.json.get('appointment_id')
+    panic = Panic(appointment_id=appt_id, user_id=user_id)
     panic.save()
     return jsonify({'message': 'Panic created', 'id': panic.id}), 201
-
-
-
 
 
 @bp.route('/call_admin', methods=['GET'])
@@ -89,17 +85,17 @@ def get_user_appointments(user_id):
     )
 
 
-@bp.route('/checkin', methods=['POST'])
+@bp.route('/appointments/<int:appt_id>/checkin', methods=['POST'])
 @require_auth
-def check_in(user_id):
+def check_in(user_id, appt_id):
     user = User.query.get(user_id)
     user.checked_in = True
     user.save()
-    ten_min_check_in(user_id)
+    ten_min_check_in(user, appt_id)
     return jsonify({'check in status': user.checked_in})
 
 
-@bp.route('/second-checkin', methods=['POST'])
+@bp.route('/appointments/<int:appt_id>/second-checkin', methods=['POST'])
 @require_auth
 def second_check_in(user_id):
     user = User.query.get(user_id)
@@ -108,7 +104,7 @@ def second_check_in(user_id):
     return jsonify({'second check in status': user.checked_in})
 
 
-@bp.route('/checkout', methods=['POST'])
+@bp.route('/appointments/<int:appt_id>/checkout', methods=['POST'])
 @require_auth
 def check_out(user_id):
     user = User.query.get(user_id)
@@ -117,20 +113,11 @@ def check_out(user_id):
     return jsonify({'check in status': user.checked_in})
 
 
-@bp.route('/<int:user_id>/appointments', methods=['GET'])
-def get_user_appointments_by_id(user_id):
-    user = User.query.get_or_404(user_id)
-    appointments = user.appointments
-
-    appointment_list = [{'id': appt.id, 'date': appt.date} for appt in appointments]
-    return jsonify(appointment_list)
-
-
-@bp.route('/<int:user_id>/appointments/<int:appt_id>', methods=['GET'])
-def get_user_appointment_by_appt_id(user_id, appt_id):
+@bp.route('/appointments/<int:appt_id>', methods=['GET'])
+def get_user_appointments_by_id(appt_id):
     appt = Appointment.query.get_or_404(appt_id)
 
-    return jsonify({'selected appointment': appt.as_dict()})
+    return jsonify(appt.as_dict())
 
 
 @bp.route('/appointments/<int:appointment_id>/decline', methods=['POST'])
@@ -150,20 +137,23 @@ def decline_appointment(user_id, appointment_id):
     return jsonify({'status': to_status})
 
 
-
-def second_check_in_checker(user_id):
-    user = User.query.get(user_id)
-    if not user.second_check_in:
-        delayed_panic()
+def second_check_in_checker(user, appt_id):
+    if not user.check_in_2:
+        delayed_panic(user, appt_id)
 
 
-def ten_min_check_in(user_id):
+def ten_min_check_in(user, appt_id):
     job_id = str(uuid.uuid4())
-    scheduler.add_job(func=second_check_in_checker, run_date=datetime.now() + timedelta(seconds=5), args=[user_id],
+    scheduler.add_job(func=second_check_in_checker, run_date=datetime.now() + timedelta(seconds=5),
+                      args=[user, appt_id], id=job_id)
+
+
+def call_panic_interm(user, appt_id):
+    panic = Panic(appointment_id=appt_id, user_id=user.id)
+    panic.save()
+
+
+def delayed_panic(user, appt_id):
+    job_id = str(uuid.uuid4())
+    scheduler.add_job(func=call_panic_interm, run_date=datetime.now() + timedelta(seconds=5), args=[user, appt_id],
                       id=job_id)
-
-
-def delayed_panic():
-    job_id = str(uuid.uuid4())
-
-    scheduler.add_job(func=user_panic, run_date=datetime.now() + timedelta(seconds=5), id=job_id)

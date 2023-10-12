@@ -45,11 +45,6 @@ class Appointment(db.Model):
     user = db.relationship('User', back_populates='appointments')  
     panics = db.relationship('Panic', back_populates='appointment')
 
-    checked_in = db.Column(db.Boolean, default=False)
-    check_in_ts = db.Column(db.DateTime, nullable=False)
-    check_in_2 = db.Column(db.Boolean, default=False)
-    check_in_2_ts = db.Column(db.DateTime, nullable=False)
-
     def save(self):
         db.session.add(self)
         db.session.commit()
@@ -88,6 +83,15 @@ class User(db.Model):
 
     appointments = db.relationship('Appointment', back_populates='user')
     panics = db.relationship('Panic', back_populates='user')
+
+    checked_in = db.Column(db.Boolean, default=False)
+    check_in_ts = db.Column(db.DateTime, nullable=False)
+    check_in_2 = db.Column(db.Boolean, default=False)
+    check_in_2_ts = db.Column(db.DateTime, nullable=False)
+
+    def save(self):
+        db.session.add(self)
+        db.session.commit()
 
     def set_password(self, password):
         self.password = bcrypt.generate_password_hash(password).decode('utf-8')
