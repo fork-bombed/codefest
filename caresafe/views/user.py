@@ -102,7 +102,7 @@ def second_check_in(user_id):
 
 @bp.route('/appointments/<int:appt_id>/checkout', methods=['POST'])
 @require_auth
-def check_out(user_id):
+def check_out(user_id, appt_id):
     user = User.query.get(user_id)
     user.checked_in = False
     user.save()
@@ -110,7 +110,8 @@ def check_out(user_id):
 
 
 @bp.route('/appointments/<int:appt_id>', methods=['GET'])
-def get_user_appointments_by_id(appt_id):
+@require_auth
+def get_user_appointments_by_id(user_id, appt_id):
     appt = Appointment.query.get_or_404(appt_id)
 
     return jsonify(appt.as_dict())
