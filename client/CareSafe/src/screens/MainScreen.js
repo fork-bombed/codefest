@@ -1,6 +1,8 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Animated, Dimensions } from 'react-native';
 import { WebView } from 'react-native-webview';
+import { PanGestureHandler, State } from 'react-native-gesture-handler';
+import AppointmentScreen from './AppointmentScreen';
 
 const MainScreen = () => {
   const htmlContent = `
@@ -31,6 +33,48 @@ const MainScreen = () => {
     </html>
   `;
 
+  const maxPanelHeight = Dimensions.get('window').height - 50; // Consider some offset for usability
+  const minPanelHeight = 300;
+  const translateY = new Animated.Value(0);
+  const panelHeight = new Animated.Value(minPanelHeight);
+
+  const onGestureEvent = Animated.event(
+    [{ nativeEvent: { translationY: translateY } }],
+    { useNativeDriver: false }
+  );
+
+  const onHandlerStateChange = event => {
+    if (event.nativeEvent.oldState === State.ACTIVE) {
+      const dragDirection = event.nativeEvent.velocityY; // Determines drag direction
+      const draggedDistance = event.nativeEvent.translationY;
+
+      if (dragDirection <= 0 && Math.abs(draggedDistance) > 40) {
+        // Dragged upwards
+        Animated.timing(panelHeight, {
+          toValue: maxPanelHeight,
+          duration: 300,
+          useNativeDriver: false,
+        }).start();
+      } else if (dragDirection > 0 && Math.abs(draggedDistance) > 40) {
+        // Dragged downwards
+        Animated.timing(panelHeight, {
+          toValue: minPanelHeight,
+          duration: 300,
+          useNativeDriver: false,
+        }).start();
+      } else {
+        // If dragged distance is less than threshold, reset panel's height
+        Animated.timing(panelHeight, {
+          toValue: minPanelHeight,
+          duration: 300,
+          useNativeDriver: false,
+        }).start();
+      }
+
+      translateY.setValue(0); // Reset the translation value
+    }
+  };
+
   return (
     <View style={styles.container}>
       <WebView 
@@ -38,6 +82,26 @@ const MainScreen = () => {
         style={styles.webView}
         scalesPageToFit={true}
       />
+      
+      <PanGestureHandler
+        onGestureEvent={onGestureEvent}
+        onHandlerStateChange={onHandlerStateChange}
+      >
+        <Animated.View
+          style={[
+            styles.panel,
+            {
+              height: panelHeight,
+              transform: [{ translateY: translateY }],
+            },
+          ]}
+        >
+          <View style={styles.panelContent}>
+            <View style={styles.panelHandle} />
+          </View>
+          <AppointmentScreen />
+        </Animated.View>
+      </PanGestureHandler>
     </View>
   );
 };
@@ -48,6 +112,25 @@ const styles = StyleSheet.create({
   },
   webView: {
     flex: 1,
+  },
+  panel: {
+    position: 'absolute',
+    height: 300,
+    width: '100%',
+    bottom: 0,
+    backgroundColor: 'white',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+  },
+  panelContent: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  panelHandle: {
+    width: 40,
+    height: 6,
+    backgroundColor: '#ccc',
+    borderRadius: 3,
   },
 });
 

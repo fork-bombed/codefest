@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Alert } from 'react-native';
+import { View, Text, StyleSheet, Alert } from 'react-native';
+import { ScrollView } from 'react-native-gesture-handler';  // <-- Import from react-native-gesture-handler
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const AppointmentsScreen = () => {
+const AppointmentScreen = () => {
     const [appointments, setAppointments] = useState([]);
 
     useEffect(() => {
@@ -10,7 +11,7 @@ const AppointmentsScreen = () => {
             try {
                 const token = await AsyncStorage.getItem('token');
                 if (token) {
-                    const response = await fetch('http://localhost:5000/user/appointments', {
+                    const response = await fetch('https://caresafe.azurewebsites.net/user/appointments', {
                         method: 'GET',
                         headers: {
                             'Authorization': `Bearer ${token}`,
@@ -94,10 +95,10 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 10,
-        backgroundColor: '#f4f4f4',
+        backgroundColor: '#ffffff',
     },
     card: {
-        backgroundColor: 'white',
+        backgroundColor: '#f4f4f4',
         padding: 20,
         marginBottom: 20,
         borderRadius: 8,
@@ -109,8 +110,8 @@ const styles = StyleSheet.create({
     firstCard: {
         shadowOpacity: 1,
         borderWidth: 0,
-        backgroundColor: '#f4f4f4',
-        borderColor: '#f4f4f4',
+        backgroundColor: '#ffffff',
+        borderColor: '#ffffff',
     },
     dateAndTime: {
         fontSize: 18,
@@ -153,4 +154,4 @@ const styles = StyleSheet.create({
     },
 });
 
-export default AppointmentsScreen;
+export default AppointmentScreen;

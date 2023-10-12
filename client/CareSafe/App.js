@@ -5,18 +5,10 @@ import { createStackNavigator } from '@react-navigation/stack';
 import LoginScreen from './src/screens/LoginScreen';
 import MainScreen from './src/screens/MainScreen';
 import AppointmentScreen from './src/screens/AppointmentScreen';
+import 'react-native-gesture-handler';
 
 
 const Stack = createStackNavigator();
-
-// useEffect(() => {
-//   // Applying on mount
-//           document.body.style.overflow = "hidden";
-//   // Applying on unmount    
-//           return () => {
-//             document.body.style.overflow = "visible";
-//           }
-//         }, [])
 
 const App = () => {
   return (
