@@ -9,9 +9,18 @@ import AppointmentScreen from './src/screens/AppointmentScreen';
 
 const Stack = createStackNavigator();
 
+// useEffect(() => {
+//   // Applying on mount
+//           document.body.style.overflow = "hidden";
+//   // Applying on unmount    
+//           return () => {
+//             document.body.style.overflow = "visible";
+//           }
+//         }, [])
+
 const App = () => {
   return (
-    <NavigationContainer>
+    <NavigationContainer style={{flex: 1, overflow: 'hidden'}}>
       <Stack.Navigator initialRouteName="Login">
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="Main" component={MainScreen} />
@@ -26,6 +35,7 @@ export default App;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    overflow: 'hidden',
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',

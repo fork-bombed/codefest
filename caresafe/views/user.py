@@ -26,7 +26,6 @@ def user_panic(user_id):
     panic = Panic(appointment_id=appointment_id, user_id=user_id)
     panic.save()
     return jsonify({'message': 'Panic created', 'id': panic.id}), 201
-    
 
  
 @bp.route('/extend', methods=['POST'])
@@ -62,7 +61,7 @@ def extend_session(user_id):
         db.session.rollback()  # Roll back changes on error
         return jsonify({'message': f'Failed to update: {str(e)}'}), 400
 
-      
+
 @bp.route('/appointments', methods=['GET'])
 @require_auth
 def get_user_appointments(user_id):
