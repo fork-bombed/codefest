@@ -217,6 +217,29 @@ const CurrentAppointmentScreen = () => {
         }
     };
 
+    const handleCheckup = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            const response = await fetch(`https://caresafe.azurewebsites.net/user/appointments/${currentAppointment.id}/second-checkin`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+    
+            if (!response.ok) {
+                throw new Error('Failed to send emergency');
+            }
+    
+            // Successfully sent emergency alert
+            Alert.alert("Alert", "Emergency signal sent.");
+        } catch (error) {
+            console.error(error);
+            Alert.alert("Error", "Failed to send emergency signal.");
+        }
+    };
+
     return (
         <View style={styles.container}>
             <View style={styles.card}>
@@ -246,9 +269,14 @@ const CurrentAppointmentScreen = () => {
                         <Text style={styles.checkedInText}>Checked In</Text>
                     </View>
                     <View style={styles.divider} />
-                    <TouchableOpacity style={styles.emergencyButton} onPress={handleEmergency}>
-                        <Text style={styles.buttonText}>Emergency</Text>
-                    </TouchableOpacity>
+                    <View style={styles.buttonRow}>
+                        <TouchableOpacity style={styles.emergencyButton} onPress={handleEmergency}>
+                            <Text style={styles.buttonText}>Emergency</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.checkupButton} onPress={handleCheckup}>
+                            <Text style={styles.buttonText}>Checkup</Text>
+                        </TouchableOpacity>
+                    </View>
                     <View style={styles.buttonRow}>
                         <TouchableOpacity style={styles.extendButton} onPress={() => {/* Add appropriate handler here */}}>
                             <Text style={styles.buttonText}>Extend Appointment</Text>
@@ -353,9 +381,18 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     emergencyButton: {
-        marginTop: 15,
-        padding: 60, // double the height
+        flex: 1,
+        marginRight: 10,
+        padding: 40,
         backgroundColor: '#D21F3C', // raspberry
+        borderRadius: 10,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    checkupButton: {
+        flex: 1,
+        padding: 40,
+        backgroundColor: '#FFA500', // orange
         borderRadius: 10,
         justifyContent: 'center',
         alignItems: 'center',

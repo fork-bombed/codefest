@@ -92,7 +92,7 @@ def check_in(user_id, appt_id):
 
 @bp.route('/appointments/<int:appt_id>/second-checkin', methods=['POST'])
 @require_auth
-def second_check_in(user_id):
+def second_check_in(user_id, appt_id):
     user = User.query.get(user_id)
     user.check_in_2 = True
     user.check_in_2_ts = datetime.now()
