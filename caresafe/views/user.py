@@ -12,15 +12,11 @@ import uuid
 
 bp = Blueprint('user', __name__, url_prefix='/user')
 
-@bp.route('/')
+@bp.route('/', methods=['GET'])
 @require_auth
 def user_home(user_id):
     user = User.query.get(user_id)
-    return jsonify(
-        {
-            'message': f'Welcome {user.username}!',
-        }
-    )
+    return jsonify(user.as_dict()), 200
 
 
 @bp.route('/appointments/<int:appt_id>/panic', methods=['POST'])
@@ -86,24 +82,22 @@ def get_user_appointments(user_id):
 @bp.route('/appointments/<int:appt_id>/checkin', methods=['POST'])
 @require_auth
 def check_in(user_id, appt_id):
-    timestamp = request.json.get('timestamp')
     user = User.query.get(user_id)
     user.checked_in = True
-    user.check_in_ts = timestamp
+    user.check_in_ts = datetime.datetime.now()
     user.save()
     ten_min_check_in(user, appt_id)
-    return jsonify({'check in status': user.checked_in})
+    return jsonify({'check in status': user.checked_in}), 200
 
 
 @bp.route('/appointments/<int:appt_id>/second-checkin', methods=['POST'])
 @require_auth
 def second_check_in(user_id):
-    timestamp = request.json.get('timestamp')
     user = User.query.get(user_id)
     user.check_in_2 = True
-    user.check_in_2_ts = timestamp
+    user.check_in_2_ts = datetime.datetime.now()
     user.save()
-    return jsonify({'second check in status': user.checked_in})
+    return jsonify({'status': user.checked_in})
 
 
 @bp.route('/appointments/<int:appt_id>/checkout', methods=['POST'])
@@ -112,7 +106,7 @@ def check_out(user_id):
     user = User.query.get(user_id)
     user.checked_in = False
     user.save()
-    return jsonify({'check in status': user.checked_in})
+    return jsonify({'status': user.checked_in})
 
 
 @bp.route('/appointments/<int:appt_id>', methods=['GET'])

@@ -46,13 +46,38 @@ const CurrentAppointmentScreen = () => {
         },
     });
 
+    const onCheckIn = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            const response = await fetch(`https://caresafe.azurewebsites.net/user/appointment/${currentAppointment.id}/checkin`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+    
+            if (!response.ok) {
+                throw new Error('Failed to check-in');
+            }
+    
+            // Successfully checked in
+            setCheckedIn(true);
+        } catch (error) {
+            console.error(error);
+            Alert.alert("Error", "Failed to check-in.");
+        }
+    };
+    
+
     const [showSlider, setShowSlider] = useState(true); // State to control visibility of the slider.
 
     // Modify this part of the panResponder to hide the slider after checking in:
     onPanResponderRelease: () => {
         if (isCheckedIn) {
+            // Allow checkout by sliding left
             if (translateX.__getValue() <= -150) {
-                setCheckedIn(false);
+                setCheckedIn(false); 
                 Animated.timing(translateX, {
                     toValue: 0,
                     duration: 300,
@@ -65,8 +90,9 @@ const CurrentAppointmentScreen = () => {
                 }).start();
             }
         } else {
+            // Allow check-in by sliding right
             if (translateX.__getValue() >= 150) {
-                setCheckedIn(true); // Just set isCheckedIn here.
+                onCheckIn(); // Call the onCheckIn function here
                 Animated.timing(translateX, {
                     toValue: 0,
                     duration: 300,
@@ -80,6 +106,35 @@ const CurrentAppointmentScreen = () => {
             }
         }
     }
+    
+
+    useEffect(() => {
+        const loadUserData = async () => {
+            try {
+                const token = await AsyncStorage.getItem('token');
+                const response = await fetch('https://caresafe.azurewebsites.net/user', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                });
+    
+                if (!response.ok) {
+                    throw new Error('Failed to fetch user data');
+                }
+    
+                const data = await response.json();
+                setCheckedIn(data.checked_in); // Use the checked_in boolean to update our local state.
+            } catch (error) {
+                console.error(error);
+                Alert.alert("Error", "Failed to fetch user data.");
+            }
+        };
+    
+        loadUserData();
+    }, []);
+    
 
     useEffect(() => {
         if (isCheckedIn) {
@@ -149,7 +204,7 @@ const CurrentAppointmentScreen = () => {
             {showSlider ? (
                 <View style={styles.sliderContainer}>
                     <Animated.View {...panResponder.panHandlers} style={[styles.sliderButton, { transform: [{ translateX }] }]}>
-                        <Text style={styles.sliderText}>{isCheckedIn ? 'Checked In' : 'Checked Out'}</Text>
+                        <Text style={styles.sliderText}>{isCheckedIn ? 'Check Out' : 'Check In'}</Text>
                     </Animated.View>
                 </View>
             ) : (
@@ -203,12 +258,15 @@ const styles = StyleSheet.create({
         overflow: 'hidden',  // This will ensure the button doesn't move outside the container.
     },
     sliderButton: {
-        width: 130,
-        height: 60,
+        width: 125,
+        height: 55,
         borderRadius: 30,  // Half of height to get a circular shape.
-        backgroundColor: '#444',
+        backgroundColor: 'green',
         justifyContent: 'center',
         alignItems: 'center',
+        marginTop: 5,
+        marginBottom: 5,
+        marginLeft: 2
     },
     sliderText: {
         color: '#fff',
