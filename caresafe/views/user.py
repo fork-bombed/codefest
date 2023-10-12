@@ -84,7 +84,7 @@ def get_user_appointments(user_id):
 def check_in(user_id, appt_id):
     user = User.query.get(user_id)
     user.checked_in = True
-    user.check_in_ts = datetime.datetime.now()
+    user.check_in_ts = datetime.now()
     user.save()
     ten_min_check_in(user, appt_id)
     return jsonify({'check in status': user.checked_in}), 200
@@ -95,7 +95,7 @@ def check_in(user_id, appt_id):
 def second_check_in(user_id):
     user = User.query.get(user_id)
     user.check_in_2 = True
-    user.check_in_2_ts = datetime.datetime.now()
+    user.check_in_2_ts = datetime.now()
     user.save()
     return jsonify({'status': user.checked_in})
 

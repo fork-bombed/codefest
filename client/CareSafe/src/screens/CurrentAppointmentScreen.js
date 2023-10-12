@@ -12,49 +12,52 @@ const CurrentAppointmentScreen = () => {
         onStartShouldSetPanResponder: () => true,
         onPanResponderMove: Animated.event([null, { dx: translateX }], { useNativeDriver: false }),
         onPanResponderRelease: () => {
-        if (isCheckedIn) {
-            // If already checked in, allow checkout by sliding left
-            if (translateX.__getValue() <= -150) {
-            setCheckedIn(false);
-            Animated.timing(translateX, {
-                toValue: 0,
-                duration: 300,
-                useNativeDriver: false,
-            }).start();
-            } else {
-            Animated.spring(translateX, {
-                toValue: 0,
-                useNativeDriver: false,
-            }).start();
-            }
-        } else {
-            // If checked out, allow check-in by sliding right
             if (translateX.__getValue() >= 150) {
-            setCheckedIn(true);
-            Animated.timing(translateX, {
-                toValue: 0,
-                duration: 300,
-                useNativeDriver: false,
-            }).start();
+                onCheckIn();
+                Animated.timing(translateX, {
+                    toValue: 0,
+                    duration: 300,
+                    useNativeDriver: false,
+                }).start();
             } else {
-            Animated.spring(translateX, {
-                toValue: 0,
-                useNativeDriver: false,
-            }).start();
+                Animated.spring(translateX, {
+                    toValue: 0,
+                    useNativeDriver: false,
+                }).start();
             }
-        }
         },
     });
+
+    const onCheckOut = async () => {
+        try {
+            const token = await AsyncStorage.getItem('token');
+            const response = await fetch(`https://caresafe.azurewebsites.net/user/appointments/${currentAppointment.id}/checkout`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+            });
+    
+            if (!response.ok) {
+                throw new Error('Failed to check-in');
+            }
+    
+            // Successfully checked out
+            setCheckedIn(false);
+        } catch (error) {
+            console.error(error);
+            Alert.alert("Error", "Failed to check-out.");
+        }
+    };
 
     const checkoutTranslateX = useRef(new Animated.Value(0)).current;
     const checkoutPanResponder = PanResponder.create({
         onStartShouldSetPanResponder: () => true,
         onPanResponderMove: Animated.event([null, { dx: checkoutTranslateX }], { useNativeDriver: false }),
         onPanResponderRelease: () => {
-            if (checkoutTranslateX.__getValue() <= -150) {
-                // Add the logic to hit the /user/appointments/<id>/checkout endpoint here.
-                // After the successful hit, you may want to set the user as checked out.
-                setCheckedIn(false); 
+            if (checkoutTranslateX.__getValue() >= 150) {
+                onCheckOut();
                 Animated.timing(checkoutTranslateX, {
                     toValue: 0,
                     duration: 300,
@@ -98,36 +101,19 @@ const CurrentAppointmentScreen = () => {
 
     // Modify this part of the panResponder to hide the slider after checking in:
     onPanResponderRelease: () => {
-        if (isCheckedIn) {
-            // Allow checkout by sliding left
-            if (translateX.__getValue() <= -150) {
-                setCheckedIn(false); 
-                Animated.timing(translateX, {
-                    toValue: 0,
-                    duration: 300,
-                    useNativeDriver: false,
-                }).start();
-            } else {
-                Animated.spring(translateX, {
-                    toValue: 0,
-                    useNativeDriver: false,
-                }).start();
-            }
+        // Allow check-in by sliding right
+        if (translateX.__getValue() >= 150) {
+            onCheckIn(); // Call the onCheckIn function here
+            Animated.timing(translateX, {
+                toValue: 0,
+                duration: 300,
+                useNativeDriver: false,
+            }).start();
         } else {
-            // Allow check-in by sliding right
-            if (translateX.__getValue() >= 150) {
-                onCheckIn(); // Call the onCheckIn function here
-                Animated.timing(translateX, {
-                    toValue: 0,
-                    duration: 300,
-                    useNativeDriver: false,
-                }).start();
-            } else {
-                Animated.spring(translateX, {
-                    toValue: 0,
-                    useNativeDriver: false,
-                }).start();
-            }
+            Animated.spring(translateX, {
+                toValue: 0,
+                useNativeDriver: false,
+            }).start();
         }
     }
     
