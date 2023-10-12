@@ -80,17 +80,21 @@ class User(db.Model):
     username = db.Column(db.String, nullable=False)
     password = db.Column(db.String, nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
-    checked_in = db.Column(db.Boolean, default=False)
 
     appointments = db.relationship('Appointment', back_populates='user')
     panics = db.relationship('Panic', back_populates='user')
 
-    def set_password(self, password):
-        self.password = bcrypt.generate_password_hash(password).decode('utf-8')
+    checked_in = db.Column(db.Boolean, default=False)
+    check_in_ts = db.Column(db.DateTime, nullable=False)
+    check_in_2 = db.Column(db.Boolean, default=False)
+    check_in_2_ts = db.Column(db.DateTime, nullable=False)
 
     def save(self):
         db.session.add(self)
         db.session.commit()
+
+    def set_password(self, password):
+        self.password = bcrypt.generate_password_hash(password).decode('utf-8')
 
     def as_dict(self):
         return {
